@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80">
+  <rect width="160" height="80" rx="14" fill="#12091b"/>
+  <path d="M82 18 A20 20 0 1 0 82 58 L96 38 Z" fill="#ff7ab6"/>
+  <circle cx="84" cy="24" r="3" fill="#0f172a"/>
+  <circle cx="58" cy="18" r="6" fill="#ef4444"/>
+  <circle cx="68" cy="14" r="6" fill="#ff7ab6"/>
+  <circle cx="112" cy="38" r="6" fill="#facc15"/>
+  <text x="80" y="74" text-anchor="middle" font-family="Verdana, Arial, sans-serif" font-size="17" font-weight="700" fill="#f8fafc">MS. PAC-MAN</text>
+</svg>
