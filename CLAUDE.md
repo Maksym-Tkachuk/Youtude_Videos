@@ -81,6 +81,7 @@ All datasets live in `src/components/BarRace/datasets/`. Copy the pattern from `
    ```
    - `title` must explicitly include `TOP 10`
    - `topN` should be `10` unless there is a clearly documented reason to use a different count
+   - **Always set `skipEmptyStartFrames: false`** — the default `true` causes the timeline dot to start mid-track whenever early years have fewer than `topN` active items, making the animation look broken. Set it to `false` so the dot always starts from the left edge at `startYear`. Instead of relying on the skip, choose a `startYear` where at least 3–5 real items have milestone data, so the opening frames show a meaningful (if sparse) chart filling in naturally.
    - The dataset time span should usually be at least `40` years
    - The dataset time span should ideally be no more than `100` years
    - If the real topic history is shorter than `40` years, use the full available range; if it is much longer than `100` years, prefer a tighter representative window unless the long historical arc is the point of the video
@@ -131,7 +132,7 @@ All datasets live in `src/components/BarRace/datasets/`. Copy the pattern from `
 - The canvas scales up via CSS `transform: scale()` to match `videoWidth`
 - The chart area always reserves exactly `topN` rows — never change `topN * slot` height to a dynamic value, or bars will jump when items enter/leave the top N
 - The player should start from the earliest frame that fills as many rows as possible up to `topN`; do not force playback to begin on a nearly empty chart if later frames can populate it
-- `targetDuration` (default 55 000 ms) controls total animation length; `msPerFrame` is auto-computed
+- `targetDuration` (default 45 000 ms) controls total animation length; target **40–50 seconds** for all videos; `msPerFrame` is auto-computed
 
 ## Color rules
 
@@ -147,3 +148,14 @@ All datasets live in `src/components/BarRace/datasets/`. Copy the pattern from `
 - The `rankColors` field in `BarRaceConfig` is no longer used and should not be set on new datasets
 - Timeline labels: only the **currently active year** gets the bright `labelActiveColor` + larger font size + glow; all other already-reached years stay at the regular dim `labelColor` — never make multiple labels bright at once
 - Bar row icon is pinned to the **bottom** of the row (`alignSelf: flex-end`); the rank-change arrow aligns to bottom with `paddingBottom` to visually center it against the icon; the rank number stays vertically centered
+
+## Content Strategy (from channel analytics — April 2026)
+
+- **Military/geopolitical topics consistently deliver the highest views, watch time, and retention** — 6 of the top 8 videos are military-themed; Nuclear Warheads has 33% retention, Military Power leads in total views
+- **Dark/controversial history** (executions, terrorism, casualties) is a reliable secondary driver — morbid curiosity drives engagement
+- **War framing boosts economic data by 40–60%** — "WW1 Spending" (1,660 views) outperforms "GDP by Country" (1,102 views) despite covering similar data; always prefer conflict framing over generic economic presentation
+- **Gaming datasets underperform** on this channel and should be deprioritized — Player Bases has 11% retention (worst), Game Genres has 153 views with 0% CTR
+- **Target 40–50 second video duration** — balances retention with replay potential on Shorts
+- **CTR is the main growth bottleneck** — Defense Budgets achieved 7.79% CTR vs most videos at 0–3%; thumbnail/title quality is the single biggest lever for growth
+- **Sequels to high-retention topics perform well** — if Nuclear Warheads has 33% retention, Nuclear Tests is a natural follow-up
+- When selecting new dataset topics, prefer the intersection of: **military/geopolitical + dramatic history + well-documented data**

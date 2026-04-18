@@ -133,6 +133,17 @@ const australiaFlag: FlagRenderer = size => (
   </FlagSvg>
 );
 
+const austriaHungaryFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="30" height="40" fill="#f8d548" />
+    <rect x="0" y="0" width="30" height="13.34" fill="#111111" />
+    <rect x="30" y="0" width="30" height="13.34" fill="#ce2939" />
+    <rect x="30" y="13.34" width="30" height="13.33" fill="#ffffff" />
+    <rect x="30" y="26.67" width="30" height="13.33" fill="#477050" />
+    <rect x="27.5" y="0" width="5" height="40" fill="#0d1120" />
+  </FlagSvg>
+);
+
 const belarusFlag: FlagRenderer = size => (
   <FlagSvg size={size}>
     <rect x="0" y="0" width="12" height="40" fill="#ffffff" />
@@ -534,14 +545,86 @@ const vietnamFlag: FlagRenderer = size => (
   </FlagSvg>
 );
 
+const polandFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#ffffff" }, { fill: "#dc143c" }])}
+  </FlagSvg>
+);
+
+const ottomanEmpireFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#c8102e" />
+    <circle cx="24" cy="20" r="8" fill="#ffffff" />
+    <circle cx="26.5" cy="20" r="6.4" fill="#c8102e" />
+    <Star cx={34} cy={20} outerRadius={3.8} fill="#ffffff" />
+  </FlagSvg>
+);
+
+const romaniaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderVerticalBands([{ fill: "#002b7f" }, { fill: "#fcd116" }, { fill: "#ce1126" }])}
+  </FlagSvg>
+);
+
+const serbiaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#c6363c" }, { fill: "#0c4076" }, { fill: "#ffffff" }])}
+  </FlagSvg>
+);
+
+const afghanistanFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderVerticalBands([{ fill: "#000000" }, { fill: "#af0000" }, { fill: "#007a36" }])}
+    <circle cx="30" cy="20" r="5" fill="none" stroke="#ffffff" strokeWidth="1.2" />
+  </FlagSvg>
+);
+
+const colombiaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#fcd116", ratio: 2 }, { fill: "#003893" }, { fill: "#ce1126" }])}
+  </FlagSvg>
+);
+
+const somaliaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#4189dd" />
+    <Star cx={30} cy={20} outerRadius={8} fill="#ffffff" />
+  </FlagSvg>
+);
+
+const syriaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#ce1126" }, { fill: "#ffffff" }, { fill: "#000000" }])}
+    <Star cx={24} cy={20} outerRadius={3} fill="#007a3d" />
+    <Star cx={36} cy={20} outerRadius={3} fill="#007a3d" />
+  </FlagSvg>
+);
+
+const yemenFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#ce1126" }, { fill: "#ffffff" }, { fill: "#000000" }])}
+  </FlagSvg>
+);
+
+const switzerlandFlag: FlagRenderer = (size) => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#DA291C" />
+    <rect x="25" y="6" width="10" height="28" fill="#ffffff" />
+    <rect x="16" y="15" width="28" height="10" fill="#ffffff" />
+  </FlagSvg>
+);
+
 const FLAG_RENDERERS: Record<string, FlagRenderer> = {
+  afghanistan: afghanistanFlag,
   argentina: argentinaFlag,
   australia: australiaFlag,
+  austria_hungary: austriaHungaryFlag,
   belarus: belarusFlag,
   bangladesh: bangladeshFlag,
   brazil: brazilFlag,
   canada: canadaFlag,
   china: chinaFlag,
+  colombia: colombiaFlag,
   cuba: cubaFlag,
   egypt: egyptFlag,
   ethiopia: ethiopiaFlag,
@@ -565,23 +648,31 @@ const FLAG_RENDERERS: Record<string, FlagRenderer> = {
   nigeria: nigeriaFlag,
   north_korea: northKoreaFlag,
   norway: norwayFlag,
+  ottoman_empire: ottomanEmpireFlag,
   pakistan: pakistanFlag,
+  poland: polandFlag,
   philippines: philippinesFlag,
+  romania: romaniaFlag,
   russia: russiaFlag,
   russian_empire: russianEmpireFlag,
+  serbia: serbiaFlag,
   ussr: russiaUssrFlag,
   russia_ussr: russiaUssrFlag,
   saudi_arabia: saudiArabiaFlag,
+  somalia: somaliaFlag,
   south_africa: southAfricaFlag,
   south_korea: southKoreaFlag,
   spain: spainFlag,
+  syria: syriaFlag,
   sweden: swedenFlag,
+  switzerland: switzerlandFlag,
   turkey: turkeyFlag,
   uae: uaeFlag,
   uk: ukFlag,
   ukraine: ukraineFlag,
   usa: usaFlag,
   venezuela: venezuelaFlag,
+  yemen: yemenFlag,
   vietnam: vietnamFlag,
 };
 

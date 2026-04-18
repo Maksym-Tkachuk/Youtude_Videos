@@ -1,6 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BarRacePlayer } from "./BarRace";
 import { GAMES_CONFIG } from "./BarRace/datasets/games";
+import { BEST_SELLING_GENRES_CONFIG } from "./BarRace/datasets/gameGenres";
+import { GAMING_REVENUE_CONFIG } from "./BarRace/datasets/gamingRevenue";
+import { PLAYER_BASES_CONFIG } from "./BarRace/datasets/playerBases";
+import { DEFENSE_BUDGET_CONFIG } from "./BarRace/datasets/defenseBudget";
+import { ARMS_EXPORTS_CONFIG } from "./BarRace/datasets/armsExports";
+import { MILITARY_GDP_CONFIG } from "./BarRace/datasets/militaryGdp";
+import { WORLD_WAR_I_SPENDING_PCT_CONFIG, WORLD_WAR_II_SPENDING_PCT_CONFIG } from "./BarRace/datasets/worldWarSpendingPct";
 import { MILITARY_CONFIG } from "./BarRace/datasets/military";
 import { GDP_CONFIG } from "./BarRace/datasets/gdp";
 import { POPULATION_CONFIG } from "./BarRace/datasets/population";
@@ -11,23 +18,66 @@ import { INTERNET_CONFIG } from "./BarRace/datasets/internet";
 import { FOOD_CONFIG } from "./BarRace/datasets/food";
 import { AIRTRAVEL_CONFIG } from "./BarRace/datasets/airtravel";
 import { DEBT_CONFIG } from "./BarRace/datasets/debt";
+import { WAR_CASUALTIES_CONFIG } from "./BarRace/datasets/warCasualties";
+import { WAR_DURATIONS_CONFIG } from "./BarRace/datasets/warDurations";
+import { PANDEMICS_CONFIG } from "./BarRace/datasets/pandemics";
+import { DICTATORS_CONFIG } from "./BarRace/datasets/dictators";
+import { FAMINES_CONFIG } from "./BarRace/datasets/famines";
+import { CO2_EMISSIONS_CONFIG } from "./BarRace/datasets/co2Emissions";
+import { TERRORISM_DEATHS_CONFIG } from "./BarRace/datasets/terrorism";
+import { EXECUTIONS_CONFIG } from "./BarRace/datasets/executions";
+import { NUCLEAR_TESTS_CONFIG } from "./BarRace/datasets/nuclearTests";
+import { GOLD_RESERVES_CONFIG } from "./BarRace/datasets/goldReserves";
+import { PRISONERS_CONFIG } from "./BarRace/datasets/prisoners";
 
 const DATASETS = [
-  { label: "🎮 Games",       config: GAMES_CONFIG },
-  { label: "🪖 Military",    config: MILITARY_CONFIG },
-  { label: "💰 GDP",         config: GDP_CONFIG },
-  { label: "🌍 Population",  config: POPULATION_CONFIG },
-  { label: "💣 Nuclear",     config: NUCLEAR_CONFIG },
-  { label: "🛢️ Oil",         config: OIL_CONFIG },
-  { label: "🏆 Olympics",    config: OLYMPICS_CONFIG },
-  { label: "📱 Internet",    config: INTERNET_CONFIG },
-  { label: "🌾 Food",        config: FOOD_CONFIG },
-  { label: "✈️ Air Travel",  config: AIRTRAVEL_CONFIG },
-  { label: "💸 Debt",        config: DEBT_CONFIG },
+  { label: "🎮 Games",             config: GAMES_CONFIG },
+  { label: "🕹️ Genres",            config: BEST_SELLING_GENRES_CONFIG },
+  { label: "💰 Platforms",         config: GAMING_REVENUE_CONFIG },
+  { label: "👥 Player Bases",      config: PLAYER_BASES_CONFIG },
+  { label: "💣 Defense Budget",    config: DEFENSE_BUDGET_CONFIG },
+  { label: "🚀 Arms Exports",      config: ARMS_EXPORTS_CONFIG },
+  { label: "📊 Military % GDP",    config: MILITARY_GDP_CONFIG },
+  { label: "⚔️ WWI Spend %",       config: WORLD_WAR_I_SPENDING_PCT_CONFIG },
+  { label: "⚔️ WWII Spend %",      config: WORLD_WAR_II_SPENDING_PCT_CONFIG },
+  { label: "🪖 Military",          config: MILITARY_CONFIG },
+  { label: "💰 GDP",               config: GDP_CONFIG },
+  { label: "🌍 Population",        config: POPULATION_CONFIG },
+  { label: "💣 Nuclear",           config: NUCLEAR_CONFIG },
+  { label: "🛢️ Oil",               config: OIL_CONFIG },
+  { label: "🏆 Olympics",          config: OLYMPICS_CONFIG },
+  { label: "📱 Internet",          config: INTERNET_CONFIG },
+  { label: "🌾 Food",              config: FOOD_CONFIG },
+  { label: "✈️ Air Travel",        config: AIRTRAVEL_CONFIG },
+  { label: "💸 Debt",              config: DEBT_CONFIG },
+  { label: "💀 War Casualties",    config: WAR_CASUALTIES_CONFIG },
+  { label: "⏳ War Durations",     config: WAR_DURATIONS_CONFIG },
+  { label: "🦠 Pandemics",         config: PANDEMICS_CONFIG },
+  { label: "👤 Dictators",         config: DICTATORS_CONFIG },
+  { label: "🌾 Famines",           config: FAMINES_CONFIG },
+  { label: "🏭 CO2 Emissions",     config: CO2_EMISSIONS_CONFIG },
+  { label: "💥 Terrorism Deaths",  config: TERRORISM_DEATHS_CONFIG },
+  { label: "⚖️ Executions",        config: EXECUTIONS_CONFIG },
+  { label: "☢️ Nuclear Tests",     config: NUCLEAR_TESTS_CONFIG },
+  { label: "🥇 Gold Reserves",     config: GOLD_RESERVES_CONFIG },
+  { label: "🔒 Prisoners",         config: PRISONERS_CONFIG },
 ];
 
 export default function GameRace() {
-  const [selected, setSelected] = useState(0);
+  const [selected, setSelected] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    const p = new URLSearchParams(window.location.search).get("dataset");
+    return p !== null ? Math.max(0, Math.min(DATASETS.length - 1, parseInt(p, 10) || 0)) : 0;
+  });
+
+  // Expose dataset metadata for the recording script
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const br = (window as any).__barRace;
+    if (!br) return;
+    br.datasetCount = DATASETS.length;
+    br.datasetLabels = DATASETS.map(d => d.label);
+  });
 
   return (
     <div

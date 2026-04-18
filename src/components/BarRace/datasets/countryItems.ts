@@ -43,6 +43,12 @@ const COUNTRY_CATALOG: Array<Pick<BarRaceItem, "id" | "name">> = [
   { id: "hungary", name: "Hungary" },
   { id: "israel", name: "Israel" },
   { id: "cuba", name: "Cuba" },
+  { id: "poland", name: "Poland" },
+  { id: "afghanistan", name: "Afghanistan" },
+  { id: "colombia", name: "Colombia" },
+  { id: "somalia", name: "Somalia" },
+  { id: "syria", name: "Syria" },
+  { id: "yemen", name: "Yemen" },
 ];
 
 const COUNTRY_COLORS = [

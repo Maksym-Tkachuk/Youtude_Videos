@@ -18,6 +18,7 @@ interface BarRowProps {
   fontBody: string;
   testIdPrefix: string;
   testIdIndex: number;
+  disableTransitions?: boolean;
 }
 
 function DefaultItemIcon({ color, size }: { color: string; size: number }) {
@@ -30,7 +31,7 @@ function DefaultItemIcon({ color, size }: { color: string; size: number }) {
   );
 }
 
-export default function BarRow({ item, rank, rankDelta, pct, barHeight, isFirst, isPulsing, isNewEntry, formatValue, formatValueFull, unitIcon, valueUnit, barTrackBg, fontBody, testIdPrefix, testIdIndex }: BarRowProps) {
+export default function BarRow({ item, rank, rankDelta, pct, barHeight, isFirst, isPulsing, isNewEntry, formatValue, formatValueFull, unitIcon, valueUnit, barTrackBg, fontBody, testIdPrefix, testIdIndex, disableTransitions }: BarRowProps) {
   const iconSize = 30;
   const rankColor = rank < 3 ? "#ffd60a" : "#86a6c8";
   const itemTestId = `${testIdPrefix}-row-${testIdIndex}`;
@@ -151,7 +152,7 @@ export default function BarRow({ item, rank, rankDelta, pct, barHeight, isFirst,
             height: "100%",
             background: `linear-gradient(90deg, ${item.color}cc, ${item.color}ff)`,
             borderRadius: 4,
-            transition: "width 0.18s ease-out",
+            transition: disableTransitions ? "none" : "width 0.18s ease-out",
             boxShadow: isPulsing ? `0 0 28px ${item.color}ff, 0 0 8px ${item.color}cc` : rank < 3 ? `0 0 14px ${item.color}88` : "none",
             animation: isPulsing ? "barPulse 0.8s ease-in-out infinite alternate" : "none",
             display: "flex",

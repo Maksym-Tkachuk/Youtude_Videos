@@ -30,7 +30,7 @@ const DEFAULT_THEME: BarRaceTheme = {
   fontBody:                 "'Barlow Condensed', 'Trebuchet MS', sans-serif",
 };
 
-const DEFAULT_TARGET_DURATION = 55_000;
+const DEFAULT_TARGET_DURATION = 45_000;
 const PLAYBACK_EASE_POWER = 1.7;
 const TEST_ID_PREFIX = "bar-race";
 
@@ -44,6 +44,23 @@ function easePlaybackProgress(progress: number): number {
 
 function invertPlaybackProgress(progress: number): number {
   return 1 - Math.pow(1 - clamp01(progress), 1 / PLAYBACK_EASE_POWER);
+}
+
+/** Back ease-out matching CSS cubic-bezier(0.34, 1.56, 0.64, 1) — slight overshoot then settle. */
+function backEaseOut(t: number): number {
+  const c = 1.56;
+  return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2);
+}
+
+/** Binary-search the cumulative time map to find the frame index for a given normalised time (0–1). */
+function findFrameForTime(map: number[], t: number, total: number): number {
+  let lo = 0, hi = total - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (map[mid] <= t) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo;
 }
 
 function DatasetDropdown({ datasets, selected, onChange, theme, testIdPrefix }: {
@@ -170,30 +187,143 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
   const theme: BarRaceTheme = { ...DEFAULT_THEME, ...config.theme };
   const testIdPrefix = TEST_ID_PREFIX;
 
+  // ── Adaptive speed: spend more time on frames with rank changes, rush through static stretches ──
+  const frameTimeMap = useMemo(() => {
+    if (totalFrames <= 1) return [0, 1];
+
+    // Score each frame: 1 = static, higher = interesting
+    const scores = new Array<number>(totalFrames).fill(1);
+    for (let i = 1; i < totalFrames; i++) {
+      const prev = frames[i - 1];
+      const curr = frames[i];
+
+      const ranking = (f: typeof curr) =>
+        config.items
+          .map(item => ({ id: item.id, v: f.vals[item.id] ?? 0 }))
+          .filter(g => g.v > minValue)
+          .sort((a, b) => b.v - a.v)
+          .slice(0, topN)
+          .map(g => g.id);
+
+      const prevIds = ranking(prev);
+      const currIds = ranking(curr);
+      const prevSet = new Set(prevIds);
+
+      let swaps = 0;
+      let entries = 0;
+      for (let r = 0; r < currIds.length; r++) {
+        if (!prevSet.has(currIds[r])) entries++;
+        else if (prevIds[r] !== currIds[r]) swaps++;
+      }
+      scores[i] = 1 + swaps * 0.5 + entries * 2;
+    }
+
+    // Smooth with a distance-weighted window so speed transitions aren't jarring
+    const radius = Math.max(3, Math.ceil(framesPerYear / 2));
+    const smoothed = new Array<number>(totalFrames);
+    for (let i = 0; i < totalFrames; i++) {
+      let sum = 0, w = 0;
+      for (let j = Math.max(0, i - radius); j <= Math.min(totalFrames - 1, i + radius); j++) {
+        const d = 1 / (1 + Math.abs(i - j));
+        sum += scores[j] * d;
+        w += d;
+      }
+      smoothed[i] = sum / w;
+    }
+
+    // Build normalised cumulative map: frameTimeMap[i] ∈ [0,1]
+    const cum = new Array<number>(totalFrames + 1);
+    cum[0] = 0;
+    let total = 0;
+    for (let i = 0; i < totalFrames; i++) { total += smoothed[i]; cum[i + 1] = total; }
+    for (let i = 0; i <= totalFrames; i++) cum[i] /= total;
+    return cum;
+  }, [frames, totalFrames, config.items, minValue, topN, framesPerYear]);
+
   const [frameIdx, setFrameIdx] = useState(0);
+  const [subFrame, setSubFrame] = useState(0);
+  const [virtualProgress, setVirtualProgress] = useState(0);
   const [playing, setPlaying]   = useState(false);
   const [endPulse, setEndPulse] = useState(false);
   const [eventBanner, setEventBanner] = useState<string | null>(null);
-  const [eventBannerKey, setEventBannerKey] = useState(0);
+  const [eventStartProgress, setEventStartProgress] = useState(0);
   const rafRef = useRef<number | null>(null);
   const playbackStartRef = useRef<number | null>(null);
   const frameIdxRef = useRef(frameIdx);
+  const subFrameRef = useRef(subFrame);
+  const virtualProgressRef = useRef(virtualProgress);
+
+  const isRecording = typeof window !== "undefined"
+    && new URLSearchParams(window.location.search).has("record");
+
+  // News ticker runs for 18s of video time; convert to a fraction of total duration
+  const TICKER_DURATION_MS = 18_000;
+  const tickerDurationNormalized = Math.min(1, TICKER_DURATION_MS / Math.max(targetDuration, 1));
+
+  // ── Recording API — exposed on window when ?record is in the URL ──
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!new URLSearchParams(window.location.search).has("record")) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__barRace = {
+      ready: true,
+      finished: false,
+      totalFrames,
+      targetDuration,
+      label: config.title,
+      datasetCount: 0,
+      datasetLabels: [] as string[],
+      play: () => { setFrameIdx(0); setSubFrame(0); setVirtualProgress(0); setEventBanner(null); prevRanksRef.current.clear(); rankAnimsRef.current.clear(); setPlaying(true); setEndPulse(false); },
+      setProgress: (t: number) => {
+        const clamped = clamp01(t);
+        const eased = easePlaybackProgress(clamped);
+        if (totalFrames > 1) {
+          const idx = findFrameForTime(frameTimeMap, eased, totalFrames);
+          const segStart = frameTimeMap[idx];
+          const segEnd = frameTimeMap[idx + 1] ?? 1;
+          const sub = segEnd > segStart ? clamp01((eased - segStart) / (segEnd - segStart)) : 0;
+          setFrameIdx(idx);
+          setSubFrame(sub);
+        } else {
+          setFrameIdx(0);
+          setSubFrame(0);
+        }
+        setVirtualProgress(clamped);
+        setPlaying(false);
+      },
+    };
+    return () => { delete (window as any).__barRace; };
+  }, [totalFrames, targetDuration, frameTimeMap, config.title]);
   const endHoldRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const eventClearRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Virtual-time rank animation for recording: mirrors the CSS 0.4s top transition
+  const RANK_TRANSITION_S = 0.4;
+  const rankTransDur = RANK_TRANSITION_S / (targetDuration / 1000); // as fraction of virtualProgress
+  const prevRanksRef = useRef<Map<string, number>>(new Map());
+  const rankAnimsRef = useRef<Map<string, { fromTop: number; startProg: number }>>(new Map());
 
   frameIdxRef.current = frameIdx;
+  subFrameRef.current = subFrame;
+  virtualProgressRef.current = virtualProgress;
 
   const frame = frames[frameIdx];
+  const nextFrame = frames[Math.min(frameIdx + 1, totalFrames - 1)];
   const timelineFrameIdx = startFrameIdx + frameIdx;
   const timelineTotalFrames = rawFrames.length;
   const frameMaxValues = useMemo(
     () => frames.map(entry => config.items.reduce((maxValue, item) => Math.max(maxValue, entry.vals[item.id] ?? 0), 0)),
     [config.items, frames]
   );
-  const scaleWindowRadius = Math.max(2, Math.round((framesPerYear === 1 ? 6 : framesPerYear) / 2));
+  const scaleWindowRadius = Math.max(2, Math.min(6, Math.round((framesPerYear === 1 ? 6 : framesPerYear) / 2)));
 
-  // Current top items
-  const allWithValues = config.items.map(item => ({ ...item, value: frame.vals[item.id] ?? 0 }));
+  // Current top items — blend vals between this frame and next so width/rank move
+  // continuously between data frames instead of snapping every 2–3 video frames.
+  const blendVal = (id: string) => {
+    const a = frame.vals[id] ?? 0;
+    const b = nextFrame.vals[id] ?? 0;
+    return a + (b - a) * subFrame;
+  };
+  const allWithValues = config.items.map(item => ({ ...item, value: blendVal(item.id) }));
   const topItems = allWithValues
     .filter(g => g.value > minValue)
     .sort((a, b) => b.value - a.value)
@@ -205,7 +335,10 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
     maxVal = Math.max(maxVal, frameMaxValues[i] ?? 0);
   }
   maxVal *= 1.02;
-  const showMonth = framesPerYear === 12 && frame.month < 12;
+  const showMonth = framesPerYear > 1;
+  const monthIdx = showMonth
+    ? Math.min(11, Math.floor((frame.month / framesPerYear) * 12))
+    : 0;
 
   const prevFrameTopIds = useMemo(() => {
     if (frameIdx === 0) return new Set<string>();
@@ -239,17 +372,17 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
     });
   }
 
-  // Event banner: show when year hits an event year
+  // Event banner: show when year hits an event year.
+  // Anchor the ticker to virtual progress (not wall-clock) so it scrolls
+  // consistently in both live playback and frame-by-frame recording.
   const prevEventYearRef = useRef<number | null>(null);
   useEffect(() => {
     if (!config.events) return;
     const label = config.events[frame.year];
     if (label && frame.year !== prevEventYearRef.current) {
       prevEventYearRef.current = frame.year;
-      if (eventClearRef.current) clearTimeout(eventClearRef.current);
       setEventBanner(label);
-      setEventBannerKey(k => k + 1);
-      eventClearRef.current = setTimeout(() => setEventBanner(null), 12000);
+      setEventStartProgress(virtualProgressRef.current);
     }
   }, [frame.year, config.events]);
 
@@ -261,8 +394,15 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
       return;
     }
 
-    const currentFrameProgress = totalFrames > 1 ? frameIdxRef.current / (totalFrames - 1) : 1;
-    const currentPlaybackProgress = invertPlaybackProgress(currentFrameProgress);
+    // Resume: map current frame → virtual time → wall-clock offset
+    const currentEasedProgress = (() => {
+      if (totalFrames <= 1) return 1;
+      const idx = frameIdxRef.current;
+      const segStart = frameTimeMap[idx];
+      const segEnd = frameTimeMap[idx + 1] ?? 1;
+      return segStart + (segEnd - segStart) * subFrameRef.current;
+    })();
+    const currentPlaybackProgress = invertPlaybackProgress(currentEasedProgress);
     playbackStartRef.current = performance.now() - currentPlaybackProgress * targetDuration;
 
     const animate = (now: number) => {
@@ -273,13 +413,20 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
         : 1;
       const easedProgress = easePlaybackProgress(playbackProgress);
       const nextFrameIdx = totalFrames > 1
-        ? Math.min(totalFrames - 1, Math.floor(easedProgress * (totalFrames - 1)))
+        ? findFrameForTime(frameTimeMap, easedProgress, totalFrames)
         : 0;
+      const segStart = frameTimeMap[nextFrameIdx] ?? 0;
+      const segEnd = frameTimeMap[nextFrameIdx + 1] ?? 1;
+      const nextSub = segEnd > segStart ? clamp01((easedProgress - segStart) / (segEnd - segStart)) : 0;
 
       setFrameIdx(prev => (prev === nextFrameIdx ? prev : nextFrameIdx));
+      setSubFrame(nextSub);
+      setVirtualProgress(playbackProgress);
 
       if (playbackProgress >= 1 || nextFrameIdx >= totalFrames - 1) {
         setFrameIdx(totalFrames - 1);
+        setSubFrame(0);
+        setVirtualProgress(1);
         setPlaying(false);
         // End screen: pulse #1 bar for 3s
         setEndPulse(true);
@@ -287,6 +434,8 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
         endHoldRef.current = setTimeout(() => setEndPulse(false), 3000);
         playbackStartRef.current = null;
         rafRef.current = null;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((window as any).__barRace) (window as any).__barRace.finished = true;
         return;
       }
 
@@ -299,10 +448,10 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
     };
-  }, [playing, targetDuration, totalFrames]);
+  }, [playing, targetDuration, totalFrames, frameTimeMap]);
 
   const togglePlay = useCallback(() => {
-    if (frameIdx >= totalFrames - 1) { setFrameIdx(0); setPlaying(true); setEndPulse(false); }
+    if (frameIdx >= totalFrames - 1) { setFrameIdx(0); setSubFrame(0); setPlaying(true); setEndPulse(false); }
     else setPlaying(p => !p);
   }, [frameIdx, totalFrames]);
 
@@ -311,7 +460,6 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
     <style>{`
       @keyframes barPulse { from { opacity: 1; } to { opacity: 0.7; } }
       @keyframes rowSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      @keyframes newsTicker { from { transform: translateX(420px); } to { transform: translateX(calc(-100% - 420px)); } }
     `}</style>
     <div data-testid={`${testIdPrefix}-page`} style={{
       minHeight: "100vh",
@@ -421,29 +569,40 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
                 display: "inline-block",
                 width: "30px",
               }}>
-                {MONTH_NAMES[frame.month]}
+                {MONTH_NAMES[monthIdx]}
               </span>
             )}
           </div>
 
-          {/* Event news ticker */}
+          {/* Event news ticker — driven by virtual progress so it scrolls
+              identically in live playback and frame-by-frame recording. */}
           <div data-testid={`${testIdPrefix}-news-ticker`} style={{ height: 20, flexShrink: 0, padding: "0 12px" }}>
-            <div style={{ height: "100%", overflow: "hidden" }}>
-              {eventBanner && (
-                <span data-testid={`${testIdPrefix}-news-ticker-text`} key={eventBannerKey} style={{
-                  display: "inline-block",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: "#ffd60a",
-                  letterSpacing: 0.5,
-                  textShadow: "0 0 10px #ffd60a88",
-                  fontFamily: theme.fontBody,
-                  whiteSpace: "nowrap",
-                  animation: "newsTicker 12s linear forwards",
-                }}>
-                  {eventBanner}
-                </span>
-              )}
+            <div style={{ height: "100%", overflow: "hidden", position: "relative" }}>
+              {eventBanner && (() => {
+                const tProg = tickerDurationNormalized > 0
+                  ? clamp01((virtualProgress - eventStartProgress) / tickerDurationNormalized)
+                  : 1;
+                if (tProg >= 1) return null;
+                // Mirror the original keyframe: from translateX(420px) → translateX(calc(-100% - 420px))
+                const pxPart = 420 - tProg * 840;
+                const pctPart = tProg * 100;
+                return (
+                  <span data-testid={`${testIdPrefix}-news-ticker-text`} style={{
+                    display: "inline-block",
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    color: "#ffd60a",
+                    letterSpacing: 0.5,
+                    textShadow: "0 0 10px #ffd60a88",
+                    fontFamily: theme.fontBody,
+                    whiteSpace: "nowrap",
+                    transform: `translateX(calc(${pxPart}px - ${pctPart}%))`,
+                    willChange: "transform",
+                  }}>
+                    {eventBanner}
+                  </span>
+                );
+              })()}
             </div>
           </div>
 
@@ -481,6 +640,37 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
               {/* Active items — keyed by id so React animates rank changes */}
               {topItems.map((item, rank) => {
                 const pct = scalePct(item.value, maxVal, scaleMode);
+
+                // In recording mode: compute visual top via virtual-time
+                // interpolation so rank slides match the browser's CSS transition.
+                let visualTop = rank * slot;
+                if (isRecording) {
+                  const targetTop = rank * slot;
+                  const prevRank = prevRanksRef.current.get(item.id);
+
+                  if (prevRank !== undefined && prevRank !== rank) {
+                    // Rank changed — capture current visual position as animation start
+                    const anim = rankAnimsRef.current.get(item.id);
+                    let fromTop = prevRank * slot;
+                    if (anim) {
+                      const t = clamp01((virtualProgress - anim.startProg) / rankTransDur);
+                      if (t < 1) {
+                        fromTop = anim.fromTop + (prevRank * slot - anim.fromTop) * backEaseOut(t);
+                      }
+                    }
+                    rankAnimsRef.current.set(item.id, { fromTop, startProg: virtualProgress });
+                  }
+                  prevRanksRef.current.set(item.id, rank);
+
+                  const anim = rankAnimsRef.current.get(item.id);
+                  if (anim) {
+                    const t = clamp01((virtualProgress - anim.startProg) / rankTransDur);
+                    if (t < 1) {
+                      visualTop = anim.fromTop + (targetTop - anim.fromTop) * backEaseOut(t);
+                    }
+                  }
+                }
+
                 return (
                   <div
                     key={item.id}
@@ -489,9 +679,9 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
                       position: "absolute",
                       left: 12,
                       right: 12,
-                      top: rank * slot,
+                      top: visualTop,
                       height: barHeight,
-                      transition: "top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                      transition: isRecording ? "none" : "top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
                     }}
                   >
                     <BarRow
@@ -511,6 +701,7 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
                       fontBody={theme.fontBody}
                       testIdPrefix={testIdPrefix}
                       testIdIndex={rank}
+                      disableTransitions={isRecording}
                     />
                   </div>
                 );
@@ -567,7 +758,7 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
         videoWidth={outputWidth}
         testIdPrefix={testIdPrefix}
         onTogglePlay={togglePlay}
-        onScrub={idx => { setPlaying(false); setFrameIdx(idx); }}
+        onScrub={idx => { setPlaying(false); setFrameIdx(idx); setSubFrame(0); }}
         theme={{
           accent:    theme.controlAccent,
           secondary: theme.controlSecondary,
