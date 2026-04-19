@@ -126,6 +126,26 @@ All datasets live in `src/components/BarRace/datasets/`. Copy the pattern from `
 
 ---
 
+## Topic Selection Rules
+
+- **Only pick topics where rankings change dynamically over time** — the whole point of a bar-race chart is watching bars overtake each other. If one entity dominates from start to finish with no real movement, the video is boring.
+- Before committing to a topic, mentally check: do the top 3 positions change at least 2–3 times across the time span? If not, pick a different topic or reframe it.
+- Avoid cumulative all-time totals where leaders lock in early and never get overtaken — prefer rate-based, annual, or per-capita metrics that allow rank shuffling.
+
+## Post-Generation Dataset Verification
+
+After generating a dataset, always verify the chart visually and numerically before recording:
+
+1. **Bar ordering must be correct at every frame** — the #1 bar must always be the longest bar on screen. If a bar in position #2 or lower appears visually longer than #1, the milestone data is wrong. Fix the data so bars always reflect the actual ranking.
+2. **Run the dev server and scrub through the animation** to spot:
+   - Bars that never move or swap positions (boring — reconsider the topic or add more granular milestones)
+   - A single entity dominating the entire timeline with no competition (boring — reframe the metric)
+   - Bars appearing out of order (data bug — fix milestones)
+3. **Capture test frames** at progress 0.0, 0.25, 0.5, 0.75, and 1.0 to verify visual correctness across the timeline
+4. If the chart looks static or broken, fix the data or discard the topic — do not ship a dataset that doesn't produce an engaging animation
+
+---
+
 ## Layout constraints (do not change)
 
 - `BASE_WIDTH = 405`, `BASE_HEIGHT = 720` — authoring canvas; always design at these dimensions
@@ -148,6 +168,16 @@ All datasets live in `src/components/BarRace/datasets/`. Copy the pattern from `
 - The `rankColors` field in `BarRaceConfig` is no longer used and should not be set on new datasets
 - Timeline labels: only the **currently active year** gets the bright `labelActiveColor` + larger font size + glow; all other already-reached years stay at the regular dim `labelColor` — never make multiple labels bright at once
 - Bar row icon is pinned to the **bottom** of the row (`alignSelf: flex-end`); the rank-change arrow aligns to bottom with `paddingBottom` to visually center it against the icon; the rank number stays vertically centered
+
+## Publishing Rules
+
+When publishing videos via MCP tools (`publish_youtube`, `publish_tiktok`, `publish_all`):
+
+- **Title**: max 60 characters total (including hashtags) — punchy, descriptive, optimized for CTR
+- **Hashtags**: append exactly 3 hashtags at the end of the title, e.g. `Top 10 Gold Reserves #goldreserves #economics #chart` — always include `#chart` as one of the three
+- **Description**: always include a short description (1–2 sentences) telling viewers what the video is about
+- Do NOT use YouTube metadata `tags` — put all keywords as `#hashtags` in the title
+- Generate the title, hashtags, and description automatically from the dataset content if the user does not provide them explicitly
 
 ## Content Strategy (from channel analytics — April 2026)
 

@@ -93,7 +93,7 @@ export default function Timeline({ frameIdx, totalFrames, currentYear, startYear
   });
 
   return (
-    <div data-testid={`${testIdPrefix}-timeline`} style={{ padding: "8px 12px 40px", fontFamily: fontBody }}>
+    <div data-testid={`${testIdPrefix}-timeline`} style={{ padding: "8px 12px 6px", fontFamily: fontBody }}>
       <div data-testid={`${testIdPrefix}-timeline-track`} style={{
         width: "100%",
         height: 2,

@@ -9,6 +9,7 @@
  *   npm run record              # record ALL datasets
  *   npm run record -- 27        # record dataset #27 only
  *   npm run record -- --list    # list available datasets
+ *   npm run record -- 27 --audio /path/to/music.mp3   # with background audio
  *
  * Requires: puppeteer (devDep), ffmpeg (system — brew install ffmpeg)
  */
@@ -55,6 +56,16 @@ function sanitise(s) {
 }
 
 // ── record one dataset ──────────────────────────────────────────────────────
+
+// ── parse --audio flag ─────────────────────────────────────────────────────
+
+let AUDIO_PATH = null;
+{
+  const ai = process.argv.indexOf("--audio");
+  if (ai !== -1 && process.argv[ai + 1]) {
+    AUDIO_PATH = path.resolve(process.argv[ai + 1]);
+  }
+}
 
 async function recordDataset(page, idx) {
   const url = `http://localhost:${PORT}/?record=1&dataset=${idx}`;
@@ -121,17 +132,24 @@ async function recordDataset(page, idx) {
 
   // ── encode with ffmpeg ────────────────────────────────────────────────
   const out = path.join(OUTPUT_DIR, `${tag}.mp4`);
-  execSync(
-    [
-      "ffmpeg -y",
-      `-framerate ${FPS}`,
-      `-i "${dir}/f%05d.png"`,
-      "-c:v libx264 -pix_fmt yuv420p",
-      "-preset medium -crf 18",
-      `"${out}"`,
-    ].join(" "),
-    { stdio: "inherit" },
-  );
+  const videoDuration = totalCapture / FPS;
+  const ffmpegArgs = [
+    "ffmpeg -y",
+    `-framerate ${FPS}`,
+    `-i "${dir}/f%05d.png"`,
+  ];
+
+  if (AUDIO_PATH) {
+    ffmpegArgs.push(`-i "${AUDIO_PATH}"`);
+    ffmpegArgs.push(`-t ${videoDuration.toFixed(2)}`);
+    ffmpegArgs.push("-c:a aac -b:a 128k -shortest");
+  }
+
+  ffmpegArgs.push("-c:v libx264 -pix_fmt yuv420p");
+  ffmpegArgs.push("-preset medium -crf 18");
+  ffmpegArgs.push(`"${out}"`);
+
+  execSync(ffmpegArgs.join(" "), { stdio: "inherit" });
 
   console.log(`  ✓ ${out}\n`);
   await rm(dir, { recursive: true, force: true });
@@ -184,7 +202,13 @@ async function main() {
       return;
     }
 
-    const arg = process.argv[2];
+    // Find the dataset index arg (skip --list, --audio and its value)
+    const positionalArgs = process.argv.slice(2).filter((a, i, arr) => {
+      if (a === "--list" || a === "--audio") return false;
+      if (i > 0 && arr[i - 1] === "--audio") return false;
+      return true;
+    });
+    const arg = positionalArgs[0];
     let indices;
     if (arg !== undefined && arg !== "--list") {
       const i = parseInt(arg, 10);

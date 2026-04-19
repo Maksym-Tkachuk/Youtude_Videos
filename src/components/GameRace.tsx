@@ -29,6 +29,12 @@ import { EXECUTIONS_CONFIG } from "./BarRace/datasets/executions";
 import { NUCLEAR_TESTS_CONFIG } from "./BarRace/datasets/nuclearTests";
 import { GOLD_RESERVES_CONFIG } from "./BarRace/datasets/goldReserves";
 import { PRISONERS_CONFIG } from "./BarRace/datasets/prisoners";
+import { FIGHTER_JETS_CONFIG } from "./BarRace/datasets/fighterJets";
+import { NAVAL_WARSHIPS_CONFIG } from "./BarRace/datasets/navalWarships";
+import { REFUGEES_CONFIG } from "./BarRace/datasets/refugees";
+import { STEEL_PRODUCTION_CONFIG } from "./BarRace/datasets/steelProduction";
+import { ARMS_IMPORTS_CONFIG } from "./BarRace/datasets/armsImports";
+import { CAR_PRODUCTION_CONFIG } from "./BarRace/datasets/carProduction";
 
 const DATASETS = [
   { label: "🎮 Games",             config: GAMES_CONFIG },
@@ -61,6 +67,12 @@ const DATASETS = [
   { label: "☢️ Nuclear Tests",     config: NUCLEAR_TESTS_CONFIG },
   { label: "🥇 Gold Reserves",     config: GOLD_RESERVES_CONFIG },
   { label: "🔒 Prisoners",         config: PRISONERS_CONFIG },
+  { label: "✈️ Fighter Jets",      config: FIGHTER_JETS_CONFIG },
+  { label: "🚢 Naval Warships",    config: NAVAL_WARSHIPS_CONFIG },
+  { label: "🏃 Refugees",          config: REFUGEES_CONFIG },
+  { label: "🏗️ Steel Production",  config: STEEL_PRODUCTION_CONFIG },
+  { label: "🔫 Arms Imports",      config: ARMS_IMPORTS_CONFIG },
+  { label: "🚗 Car Production",    config: CAR_PRODUCTION_CONFIG },
 ];
 
 export default function GameRace() {

@@ -551,6 +551,47 @@ const polandFlag: FlagRenderer = size => (
   </FlagSvg>
 );
 
+const greeceFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([
+      { fill: "#0d5eaf" },
+      { fill: "#ffffff" },
+      { fill: "#0d5eaf" },
+      { fill: "#ffffff" },
+      { fill: "#0d5eaf" },
+      { fill: "#ffffff" },
+      { fill: "#0d5eaf" },
+      { fill: "#ffffff" },
+      { fill: "#0d5eaf" },
+    ])}
+    <rect x="0" y="0" width="24" height="22.2" fill="#0d5eaf" />
+    <rect x="9" y="0" width="6" height="22.2" fill="#ffffff" />
+    <rect x="0" y="8.6" width="24" height="5" fill="#ffffff" />
+  </FlagSvg>
+);
+
+const taiwanFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#fe0000" />
+    <rect x="0" y="0" width="26" height="22" fill="#000095" />
+    <circle cx="13" cy="11" r="5.5" fill="#ffffff" />
+    <circle cx="13" cy="11" r="4" fill="#000095" />
+    <circle cx="13" cy="11" r="2.5" fill="#ffffff" />
+  </FlagSvg>
+);
+
+const thailandFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([
+      { fill: "#a51931", ratio: 1 },
+      { fill: "#f4f5f8", ratio: 1 },
+      { fill: "#2d2a4a", ratio: 2 },
+      { fill: "#f4f5f8", ratio: 1 },
+      { fill: "#a51931", ratio: 1 },
+    ])}
+  </FlagSvg>
+);
+
 const ottomanEmpireFlag: FlagRenderer = size => (
   <FlagSvg size={size}>
     <rect x="0" y="0" width="60" height="40" fill="#c8102e" />
@@ -614,6 +655,274 @@ const switzerlandFlag: FlagRenderer = (size) => (
   </FlagSvg>
 );
 
+const sudanFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#d21034" }, { fill: "#ffffff" }, { fill: "#000000" }])}
+    <polygon points="0,0 18,20 0,40" fill="#007229" />
+  </FlagSvg>
+);
+
+const southSudanFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([
+      { fill: "#000000", ratio: 3 },
+      { fill: "#ffffff", ratio: 0.5 },
+      { fill: "#d21034", ratio: 3 },
+      { fill: "#ffffff", ratio: 0.5 },
+      { fill: "#078930", ratio: 3 },
+    ])}
+    <polygon points="0,0 22,20 0,40" fill="#0f47af" />
+    <Star cx={9} cy={20} outerRadius={5} fill="#fcd116" />
+  </FlagSvg>
+);
+
+const myanmarFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#fecb00" }, { fill: "#34b233" }, { fill: "#ea2839" }])}
+    <Star cx={30} cy={20} outerRadius={8} fill="#ffffff" />
+  </FlagSvg>
+);
+
+const congoFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#007fff" />
+    <line x1="0" y1="40" x2="60" y2="0" stroke="#f7d618" strokeWidth="6" />
+    <line x1="0" y1="40" x2="60" y2="0" stroke="#ce1021" strokeWidth="3" />
+    <Star cx={12} cy={8} outerRadius={4.5} fill="#f7d618" />
+  </FlagSvg>
+);
+
+const eritreaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="20" fill="#4189dd" />
+    <rect x="0" y="20" width="60" height="20" fill="#12ad2b" />
+    <polygon points="0,0 60,20 0,40" fill="#ea0437" />
+    <circle cx="16" cy="20" r="6" fill="none" stroke="#f3c62b" strokeWidth="1.8" />
+  </FlagSvg>
+);
+
+const burundiFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <polygon points="0,0 30,20 60,0" fill="#ce1126" />
+    <polygon points="60,0 30,20 60,40" fill="#ce1126" />
+    <polygon points="60,40 30,20 0,40" fill="#1eb53a" />
+    <polygon points="0,40 30,20 0,0" fill="#1eb53a" />
+    <line x1="0" y1="0" x2="60" y2="40" stroke="#ffffff" strokeWidth="4" />
+    <line x1="60" y1="0" x2="0" y2="40" stroke="#ffffff" strokeWidth="4" />
+    <circle cx="30" cy="20" r="8" fill="#ffffff" />
+    <Star cx={30} cy={13} outerRadius={2.4} fill="#ce1126" />
+    <Star cx={24} cy={23} outerRadius={2.4} fill="#ce1126" />
+    <Star cx={36} cy={23} outerRadius={2.4} fill="#ce1126" />
+  </FlagSvg>
+);
+
+const centralAfricanRepublicFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#003082" }, { fill: "#ffffff" }, { fill: "#289611" }, { fill: "#ffcf00" }])}
+    <rect x="26" y="0" width="8" height="40" fill="#d21034" />
+    <Star cx={10} cy={5} outerRadius={3} fill="#ffcf00" />
+  </FlagSvg>
+);
+
+const rwandaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#00a1de", ratio: 2 }, { fill: "#fad201", ratio: 1 }, { fill: "#20603d", ratio: 1 }])}
+    <circle cx="46" cy="10" r="4.5" fill="#e5be01" />
+  </FlagSvg>
+);
+
+const sriLankaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#ffbe29" />
+    <rect x="2" y="2" width="14" height="36" fill="#00534e" />
+    <rect x="18" y="2" width="40" height="36" fill="#8b0000" />
+    <rect x="48" y="6" width="6" height="28" rx="1" fill="#ffbe29" />
+  </FlagSvg>
+);
+
+const tibetFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#ffffff" />
+    <polygon points="0,40 30,12 60,40" fill="#d42427" />
+    <circle cx="30" cy="10" r="4" fill="#fcd116" />
+  </FlagSvg>
+);
+
+const cambodiaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#032ea1" }, { fill: "#e00025", ratio: 2 }, { fill: "#032ea1" }])}
+    <rect x="22" y="14" width="16" height="14" fill="#ffffff" />
+    <rect x="25" y="10" width="10" height="4" fill="#ffffff" />
+    <rect x="28" y="7" width="4" height="3" fill="#ffffff" />
+  </FlagSvg>
+);
+
+const mozambiqueFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#009639" }, { fill: "#ffffff", ratio: 0.3 }, { fill: "#000000" }, { fill: "#ffffff", ratio: 0.3 }, { fill: "#fcdd09" }])}
+    <polygon points="0,0 22,20 0,40" fill="#d21034" />
+    <Star cx={9} cy={20} outerRadius={4} fill="#fcdd09" />
+  </FlagSvg>
+);
+
+const maliFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderVerticalBands([{ fill: "#14b53a" }, { fill: "#fcd116" }, { fill: "#ce1126" }])}
+  </FlagSvg>
+);
+
+const chadFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderVerticalBands([{ fill: "#002664" }, { fill: "#fecb00" }, { fill: "#c60c30" }])}
+  </FlagSvg>
+);
+
+const bosniaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#002395" />
+    <polygon points="20,0 50,0 50,40" fill="#fecb00" />
+    <Star cx={21} cy={3} outerRadius={2.2} fill="#ffffff" />
+    <Star cx={27} cy={10} outerRadius={2.2} fill="#ffffff" />
+    <Star cx={33} cy={17} outerRadius={2.2} fill="#ffffff" />
+    <Star cx={39} cy={24} outerRadius={2.2} fill="#ffffff" />
+    <Star cx={45} cy={31} outerRadius={2.2} fill="#ffffff" />
+    <Star cx={51} cy={38} outerRadius={2.2} fill="#ffffff" />
+  </FlagSvg>
+);
+
+const palestineFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#000000" }, { fill: "#ffffff" }, { fill: "#007a3d" }])}
+    <polygon points="0,0 20,20 0,40" fill="#ce1126" />
+  </FlagSvg>
+);
+
+const newZealandFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#00247d" />
+    <UnionJack width={28} height={18} />
+    <Star cx={46} cy={10} outerRadius={3.2} fill="#cc142b" />
+    <Star cx={52} cy={18} outerRadius={3.2} fill="#cc142b" />
+    <Star cx={48} cy={27} outerRadius={3.2} fill="#cc142b" />
+    <Star cx={42} cy={22} outerRadius={3.2} fill="#cc142b" />
+  </FlagSvg>
+);
+
+const namibiaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#003580" />
+    <polygon points="0,40 60,0 60,12 0,40" fill="#009543" />
+    <polygon points="0,28 60,0 0,0" fill="#003580" />
+    <polygon points="0,40 60,12 60,0 0,28" fill="#ffffff" />
+    <polygon points="0,40 60,16 60,12 0,36" fill="#d21034" />
+    <polygon points="0,40 0,28 60,0" fill="#003580" />
+    <polygon points="0,36 0,40 60,16" fill="#009543" />
+    <circle cx="14" cy="14" r="7" fill="#ffce00" />
+    <circle cx="16" cy="12" r="6" fill="#003580" />
+  </FlagSvg>
+);
+
+const guatemalaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderVerticalBands([{ fill: "#4997d0" }, { fill: "#ffffff" }, { fill: "#4997d0" }])}
+    <circle cx="30" cy="20" r="5" fill="none" stroke="#4e8a3e" strokeWidth="1.5" />
+  </FlagSvg>
+);
+
+const eastTimorFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#dc241f" />
+    <polygon points="0,0 36,20 0,40" fill="#ffc726" />
+    <polygon points="0,0 24,20 0,40" fill="#000000" />
+    <Star cx={10} cy={20} outerRadius={4.5} fill="#ffffff" />
+  </FlagSvg>
+);
+
+const belgiumFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderVerticalBands([{ fill: "#000000" }, { fill: "#ffd90c" }, { fill: "#f31830" }])}
+  </FlagSvg>
+);
+
+const austriaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#ed2939" }, { fill: "#ffffff" }, { fill: "#ed2939" }])}
+  </FlagSvg>
+);
+
+const czechRepublicFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="20" fill="#ffffff" />
+    <rect x="0" y="20" width="60" height="20" fill="#d7141a" />
+    <polygon points="0,0 30,20 0,40" fill="#11457e" />
+  </FlagSvg>
+);
+
+const slovakiaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#ffffff" }, { fill: "#0b4ea2" }, { fill: "#ee1c25" }])}
+    <rect x="6" y="10" width="18" height="20" rx="0" fill="#ee1c25" />
+    <rect x="8" y="12" width="14" height="16" rx="0" fill="#ffffff" />
+    <path d="M15 18 Q12 22 8 28 H22 Q18 22 15 18 Z" fill="#0b4ea2" />
+    <rect x="13" y="14" width="4" height="10" rx="1" fill="#0b4ea2" />
+    <rect x="9" y="18" width="12" height="3" rx="1" fill="#0b4ea2" />
+  </FlagSvg>
+);
+
+const malaysiaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([
+      { fill: "#cc0001" }, { fill: "#ffffff" },
+      { fill: "#cc0001" }, { fill: "#ffffff" },
+      { fill: "#cc0001" }, { fill: "#ffffff" },
+      { fill: "#cc0001" }, { fill: "#ffffff" },
+      { fill: "#cc0001" }, { fill: "#ffffff" },
+      { fill: "#cc0001" }, { fill: "#ffffff" },
+      { fill: "#cc0001" }, { fill: "#ffffff" },
+    ])}
+    <rect x="0" y="0" width="28" height="22.86" fill="#010066" />
+    <circle cx="12" cy="11.4" r="5.5" fill="#fc0" />
+    <circle cx="14" cy="11.4" r="4.8" fill="#010066" />
+    <Star cx={20} cy={11.4} outerRadius={3.8} fill="#fc0" innerRadius={1.5} />
+  </FlagSvg>
+);
+
+const qatarFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#8a1538" />
+    <polygon points="0,0 18,0 22,4.44 18,8.88 22,13.33 18,17.77 22,22.22 18,26.66 22,31.11 18,35.55 22,40 18,40 0,40" fill="#ffffff" />
+  </FlagSvg>
+);
+
+const singaporeFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderHorizontalBands([{ fill: "#ef3340" }, { fill: "#ffffff" }])}
+    <circle cx="14" cy="10" r="5" fill="#ffffff" />
+    <circle cx="16" cy="10" r="5" fill="#ef3340" />
+    <Star cx={20} cy={5} outerRadius={1.5} fill="#ffffff" />
+    <Star cx={24} cy={7} outerRadius={1.5} fill="#ffffff" />
+    <Star cx={24} cy={13} outerRadius={1.5} fill="#ffffff" />
+    <Star cx={20} cy={15} outerRadius={1.5} fill="#ffffff" />
+    <Star cx={17} cy={10} outerRadius={1.5} fill="#ffffff" />
+  </FlagSvg>
+);
+
+const moroccoFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    <rect x="0" y="0" width="60" height="40" fill="#c1272d" />
+    <path d={starPath(30, 20, 8, 3.2)} fill="none" stroke="#006233" strokeWidth="1.8" />
+  </FlagSvg>
+);
+
+const algeriaFlag: FlagRenderer = size => (
+  <FlagSvg size={size}>
+    {renderVerticalBands([{ fill: "#006233" }, { fill: "#ffffff" }])}
+    <circle cx="33" cy="20" r="7" fill="#d21034" />
+    <circle cx="35" cy="20" r="6" fill="#ffffff" />
+    <Star cx={38} cy={16} outerRadius={3} fill="#d21034" />
+  </FlagSvg>
+);
+
 const FLAG_RENDERERS: Record<string, FlagRenderer> = {
   afghanistan: afghanistanFlag,
   argentina: argentinaFlag,
@@ -631,6 +940,7 @@ const FLAG_RENDERERS: Record<string, FlagRenderer> = {
   finland: finlandFlag,
   france: franceFlag,
   germany: germanyFlag,
+  greece: greeceFlag,
   great_britain: ukFlag,
   hungary: hungaryFlag,
   india: indiaFlag,
@@ -645,6 +955,7 @@ const FLAG_RENDERERS: Record<string, FlagRenderer> = {
   libya: libyaFlag,
   mexico: mexicoFlag,
   netherlands: netherlandsFlag,
+  new_zealand: newZealandFlag,
   nigeria: nigeriaFlag,
   north_korea: northKoreaFlag,
   norway: norwayFlag,
@@ -666,6 +977,8 @@ const FLAG_RENDERERS: Record<string, FlagRenderer> = {
   syria: syriaFlag,
   sweden: swedenFlag,
   switzerland: switzerlandFlag,
+  taiwan: taiwanFlag,
+  thailand: thailandFlag,
   turkey: turkeyFlag,
   uae: uaeFlag,
   uk: ukFlag,
@@ -674,6 +987,34 @@ const FLAG_RENDERERS: Record<string, FlagRenderer> = {
   venezuela: venezuelaFlag,
   yemen: yemenFlag,
   vietnam: vietnamFlag,
+  sudan: sudanFlag,
+  south_sudan: southSudanFlag,
+  myanmar: myanmarFlag,
+  congo: congoFlag,
+  eritrea: eritreaFlag,
+  burundi: burundiFlag,
+  central_african_republic: centralAfricanRepublicFlag,
+  rwanda: rwandaFlag,
+  sri_lanka: sriLankaFlag,
+  tibet: tibetFlag,
+  cambodia: cambodiaFlag,
+  mozambique: mozambiqueFlag,
+  mali: maliFlag,
+  chad: chadFlag,
+  bosnia: bosniaFlag,
+  palestine: palestineFlag,
+  namibia: namibiaFlag,
+  guatemala: guatemalaFlag,
+  east_timor: eastTimorFlag,
+  belgium: belgiumFlag,
+  austria: austriaFlag,
+  czech_republic: czechRepublicFlag,
+  slovakia: slovakiaFlag,
+  malaysia: malaysiaFlag,
+  qatar: qatarFlag,
+  singapore: singaporeFlag,
+  morocco: moroccoFlag,
+  algeria: algeriaFlag,
 };
 
 export function renderFlagIcon(id: string, size: number): ReactNode | null {

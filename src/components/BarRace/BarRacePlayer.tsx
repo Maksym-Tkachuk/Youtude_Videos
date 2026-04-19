@@ -310,11 +310,6 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
   const nextFrame = frames[Math.min(frameIdx + 1, totalFrames - 1)];
   const timelineFrameIdx = startFrameIdx + frameIdx;
   const timelineTotalFrames = rawFrames.length;
-  const frameMaxValues = useMemo(
-    () => frames.map(entry => config.items.reduce((maxValue, item) => Math.max(maxValue, entry.vals[item.id] ?? 0), 0)),
-    [config.items, frames]
-  );
-  const scaleWindowRadius = Math.max(2, Math.min(6, Math.round((framesPerYear === 1 ? 6 : framesPerYear) / 2)));
 
   // Current top items — blend vals between this frame and next so width/rank move
   // continuously between data frames instead of snapping every 2–3 video frames.
@@ -328,14 +323,22 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
     .filter(g => g.value > minValue)
     .sort((a, b) => b.value - a.value)
     .slice(0, topN);
-  let maxVal = 1;
-  const scaleWindowStart = Math.max(0, frameIdx - scaleWindowRadius);
-  const scaleWindowEnd = Math.min(totalFrames - 1, frameIdx + scaleWindowRadius);
-  for (let i = scaleWindowStart; i <= scaleWindowEnd; i++) {
-    maxVal = Math.max(maxVal, frameMaxValues[i] ?? 0);
-  }
-  maxVal *= 1.02;
-  const showMonth = framesPerYear > 1;
+  // maxVal = the largest value seen from the start up to the current frame.
+  // This ensures bars grow as values increase over time, while guaranteeing
+  // #1 always has the longest bar (since it has the highest current value
+  // and maxVal >= all current values).
+  const globalMaxUpToNow = useMemo(() => {
+    let gMax = 1;
+    for (let i = 0; i <= frameIdx; i++) {
+      for (const item of config.items) {
+        gMax = Math.max(gMax, frames[i].vals[item.id] ?? 0);
+      }
+    }
+    return gMax;
+  }, [config.items, frames, frameIdx]);
+  const maxVal = Math.max(globalMaxUpToNow, ...allWithValues.map(i => i.value)) * 1.02;
+  const yearSpan = config.endYear - config.startYear;
+  const showMonth = framesPerYear > 1 && yearSpan <= 30;
   const monthIdx = showMonth
     ? Math.min(11, Math.floor((frame.month / framesPerYear) * 12))
     : 0;
@@ -518,7 +521,7 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
           fontFamily: theme.fontBody,
         }}>
           {/* Header */}
-          <div data-testid={`${testIdPrefix}-header`} style={{ padding: "24px 0 8px", textAlign: "center", flexShrink: 0 }}>
+          <div data-testid={`${testIdPrefix}-header`} style={{ padding: "12px 0 4px", textAlign: "center", flexShrink: 0 }}>
             <h1 data-testid={`${testIdPrefix}-title`} style={{
               margin: 0,
               fontSize: 26,
@@ -538,7 +541,7 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
 
           {/* Year Display — fixed width prevents layout shift when digits change */}
           <div data-testid={`${testIdPrefix}-date`} style={{
-            padding: "4px 16px 4px",
+            padding: "2px 16px 2px",
             display: "flex",
             justifyContent: "flex-end",
             alignItems: "baseline",
@@ -727,26 +730,6 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
             }}
           />
 
-          {/* Watermark */}
-          {(config.sourceLabel || config.channelLabel) && (
-            <div data-testid={`${testIdPrefix}-watermark`} style={{
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "0 14px 10px",
-              flexShrink: 0,
-            }}>
-              {config.sourceLabel && (
-                <span data-testid={`${testIdPrefix}-source-label`} style={{ fontSize: 10, color: theme.timelineLabelColor, letterSpacing: 0.5 }}>
-                  {config.sourceLabel}
-                </span>
-              )}
-              {config.channelLabel && (
-                <span data-testid={`${testIdPrefix}-channel-label`} style={{ fontSize: 10, color: theme.timelineLabelColor, letterSpacing: 0.5, marginLeft: "auto" }}>
-                  {config.channelLabel}
-                </span>
-              )}
-            </div>
-          )}
         </div>
       </div>
       </div>

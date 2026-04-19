@@ -33,6 +33,9 @@ const COUNTRY_CATALOG: Array<Pick<BarRaceItem, "id" | "name">> = [
   { id: "venezuela", name: "Venezuela" },
   { id: "libya", name: "Libya" },
   { id: "egypt", name: "Egypt" },
+  { id: "greece", name: "Greece" },
+  { id: "taiwan", name: "Taiwan" },
+  { id: "thailand", name: "Thailand" },
   { id: "vietnam", name: "Vietnam" },
   { id: "philippines", name: "Philippines" },
   { id: "bangladesh", name: "Bangladesh" },
@@ -49,6 +52,11 @@ const COUNTRY_CATALOG: Array<Pick<BarRaceItem, "id" | "name">> = [
   { id: "somalia", name: "Somalia" },
   { id: "syria", name: "Syria" },
   { id: "yemen", name: "Yemen" },
+  { id: "qatar", name: "Qatar" },
+  { id: "singapore", name: "Singapore" },
+  { id: "morocco", name: "Morocco" },
+  { id: "malaysia", name: "Malaysia" },
+  { id: "algeria", name: "Algeria" },
 ];
 
 const COUNTRY_COLORS = [

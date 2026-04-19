@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "video-publish": {
+      "command": "node",
+      "args": ["mcp-publish/server.mjs"]
+    }
+  }
+}
