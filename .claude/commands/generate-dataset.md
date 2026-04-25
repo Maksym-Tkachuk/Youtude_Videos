@@ -9,12 +9,36 @@ Generate a new bar-race chart dataset from scratch, register it in the app, and 
 
 ### 1. Topic Feasibility Check
 
-Before writing any code, evaluate the topic:
+Before writing any code, evaluate the topic against both animation quality AND channel performance data:
+
+#### Animation quality
 - **Rankings must change dynamically over time** — the whole point is watching bars overtake each other. If one entity dominates start to finish, the video is boring.
 - Mentally check: do the top 3 positions change at least 2-3 times across the time span? If not, suggest a reframe or alternate topic.
 - Avoid cumulative all-time totals where leaders lock in early — prefer rate-based, annual, or per-capita metrics.
-- **Prefer military/geopolitical topics** — they consistently deliver the highest views. Dark/controversial history is a reliable secondary driver. Gaming topics underperform.
-- War framing boosts economic data by 40-60% (e.g. "WW1 Spending" > "GDP by Country").
+
+#### Channel performance insights (from GlobalPace analytics — April 22, 2026 — 39 videos, 38.5K views)
+- **Tier 1 topics (1,400+ views):** Submarine Fleets (1,819), WW1 Spending (1,715), Military Power (1,669), WW2 Spending (1,538), Nuclear Tests (1,523), Executions (1,505), Gold Reserves (1,497), Defense Budgets (1,486), Fighter Jets (1,443), Car Production (1,413)
+- **Tier 2 topics (1,000–1,400):** Terrorism, Military GDP, Arms Exports, Nuclear Warheads, Naval Warships, GDP, Prisoners, Refugees, Steel Production
+- **Tier 3 topics (AVOID, <800):** CO2, Debt, Olympics, Internet, Food, Oil, Population, Game Genres (155 — worst ever)
+- **Military hardware is king** — Submarine Fleets #1 (1,819), Fighter Jets best engagement (0.90% like rate). Always prioritize.
+- **War framing boosts economic data by 55%** — "WW1 Spending" (1,715) vs "GDP" (1,103)
+- **NEVER generate gaming datasets** — they consistently underperform
+- **Dark/morbid curiosity is reliable** — Executions, Nuclear Tests, Terrorism all 1,300+ views
+- If the user proposes a Tier 3 topic, suggest a military/conflict reframe
+
+#### Chart type selection
+- **Bar Race (default)** — avg ~1,100 views, proven format. Use for time-series data with rank changes.
+- **Countdown** — 1,137 views on first attempt. Use for static "current year rankings" like "Most Powerful Militaries 2025". Set `targetDuration: 30000` (30s).
+- **World Map** — avg 782 views (early data). Use sparingly for geographic spread topics like nuclear proliferation.
+- **Empire Map** — untested but high viral potential. Use for historical territory changes (empires, wars, colonization).
+- When the user doesn't specify a chart type, default to **bar race** unless the topic clearly fits another type.
+
+#### Ideal topic formula
+Pick topics at the intersection of: **military/geopolitical + dramatic historical events + well-documented data + clear rank changes over time**
+
+#### Publishing rules
+- **Max 1 video per day** — batching 3+ videos/day averages 30% fewer views per video
+- When generating multiple datasets in one session, they should be deployed staggered (2h apart)
 
 If the topic is unsuitable, explain why and suggest alternatives before proceeding.
 
@@ -158,12 +182,24 @@ Then use Playwright or a browser to capture frames at progress 0.0, 0.25, 0.5, 0
 
 If the chart looks static, broken, or has ordering issues — fix the data before finishing.
 
-### 8. Report
+### 8. Verify — Real-World Accuracy (auto-invoke /verify-dataset)
+
+**MANDATORY**: After completing steps 1-7, invoke the `/verify-dataset` skill on the newly created file. This skill will:
+- Search the web for authoritative data on every top-10 country
+- Verify rankings, peak values, transition dates, and event facts
+- Fix any inaccuracies automatically
+- Report a full verification table
+
+Do NOT skip this step. Do NOT manually spot-check instead — always use the `/verify-dataset` skill which does comprehensive web research.
+
+### 9. Report
 
 Print the final result:
 - Dataset file path
 - Number of items
 - Time span (startYear - endYear)
 - Number of events
+- Verification table from `/verify-dataset` (minimum 10 data points checked)
+- Any corrections made during accuracy review
 - Any warnings or issues found during verification
 - The dataset index number for recording (check with `npm run record -- --list`)

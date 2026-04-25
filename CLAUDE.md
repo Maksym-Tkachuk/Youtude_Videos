@@ -179,13 +179,59 @@ When publishing videos via MCP tools (`publish_youtube`, `publish_tiktok`, `publ
 - Do NOT use YouTube metadata `tags` — put all keywords as `#hashtags` in the title
 - Generate the title, hashtags, and description automatically from the dataset content if the user does not provide them explicitly
 
-## Content Strategy (from channel analytics — April 2026)
+## Content Strategy (from channel analytics — April 22, 2026 — 39 videos, 38.5K views, 10 subs)
 
-- **Military/geopolitical topics consistently deliver the highest views, watch time, and retention** — 6 of the top 8 videos are military-themed; Nuclear Warheads has 33% retention, Military Power leads in total views
-- **Dark/controversial history** (executions, terrorism, casualties) is a reliable secondary driver — morbid curiosity drives engagement
-- **War framing boosts economic data by 40–60%** — "WW1 Spending" (1,660 views) outperforms "GDP by Country" (1,102 views) despite covering similar data; always prefer conflict framing over generic economic presentation
-- **Gaming datasets underperform** on this channel and should be deprioritized — Player Bases has 11% retention (worst), Game Genres has 153 views with 0% CTR
-- **Target 40–50 second video duration** — balances retention with replay potential on Shorts
-- **CTR is the main growth bottleneck** — Defense Budgets achieved 7.79% CTR vs most videos at 0–3%; thumbnail/title quality is the single biggest lever for growth
-- **Sequels to high-retention topics perform well** — if Nuclear Warheads has 33% retention, Nuclear Tests is a natural follow-up
-- When selecting new dataset topics, prefer the intersection of: **military/geopolitical + dramatic history + well-documented data**
+### Topic performance tiers
+- **Tier 1 (1,400+ views):** Submarine Fleets (1,819), WW1 Spending (1,715), Military Power (1,669), WW2 Spending (1,538), Nuclear Tests (1,523), Executions (1,505), Gold Reserves (1,497), Defense Budgets (1,486), Air Travel (1,463), Fighter Jets (1,443), Car Production (1,413)
+- **Tier 2 (1,000–1,400):** Terrorism (1,365), Military GDP (1,318), Arms Exports (1,199), Nuclear Warheads (1,197), Countdown: Militaries 2025 (1,137), Naval Warships (1,135), GDP (1,103), Player Bases (1,102), Prisoners (1,051), Refugees (1,051), Steel Production (1,013)
+- **Tier 3 — AVOID (<800):** CO2 (867), Debt (756), Olympics (642), Internet (608), Food (590), Oil (393), Population (192), Game Genres (155)
+
+### What works
+- **Military hardware is king** — Submarine Fleets is #1 (1,819), Fighter Jets has best engagement (0.90% like rate, 13 likes). Always prioritize military hardware topics.
+- **War spending/history dominates** — 7 of top 11 videos are military/war-themed
+- **War framing boosts economic data by 55%** — "WW1 Spending" (1,715) vs "GDP" (1,103) despite similar underlying data
+- **Dark/morbid curiosity is reliable** — Executions (1,505), Nuclear Tests (1,523), Terrorism (1,365) all Tier 1–2
+- **Sequels to high performers work** — Nuclear Warheads (1,197) → Nuclear Tests (1,523) showed 27% improvement
+- **Car Production surprised at 1,413** — industrial topics CAN work when the data has dramatic rank changes
+
+### What doesn't work
+- **Gaming is dead** — Game Genres: 155 views (worst), avoid entirely
+- **Generic economic/environmental topics underperform** — CO2, Food, Internet, Population all below 700 views
+- **Publishing too many videos at once kills reach:**
+  - 1-2 videos/day (Apr 10-13): avg **1,454** views
+  - 3-4 videos/day (Apr 18-20): avg **1,116** views
+  - 3 videos same day (Apr 22): avg **776** views (still early but trend is clear)
+
+### Chart type performance
+- **Bar Race** — avg ~1,100 views, proven format, use for 80% of content
+- **Countdown** — 1,137 views on first attempt (promising), good for static "2025 rankings" topics, use for ~15%
+- **World Map** — avg 782 views (3 videos), still early data — needs more time to evaluate, use sparingly ~5%
+- **Empire Map** — untested, high viral potential based on similar content on other channels
+
+### Publishing rules
+- **Max 1 video per day** — spacing videos out gets 30% more views per video
+- When batch-deploying: publish first video public, schedule rest 2 hours apart using `update_video_status`
+- Post comments on all videos while they're public before scheduling
+- Best posting time: needs YouTube Analytics API to determine (enable it!)
+
+### Growth bottlenecks (priority order)
+1. **Subscriber conversion is critical** — 38.5K views → 10 subs (0.026%) means viewers never subscribe; subscribe CTA overlay was just added, monitor impact
+2. **Publishing cadence** — max 1 video per day; stagger with `update_video_status` when batch-deploying
+3. **Title clickability** — dramatic/question titles outperform descriptive ones by 30-50%
+4. **Topic selection** — stop publishing Tier 3 topics; every video should be Tier 1 or Tier 2 material
+
+### Title formulas that work on Shorts
+- Question hook: "Which Country Has the Most Tanks?" > "Top 10 Tank Fleets"
+- Dramatic framing: "How WW1 Bankrupted Europe" > "WW1 Government Spending"
+- Superlative + timeframe: "The Most Expensive War Ever Fought" > "WW2 Spending by Country"
+- Keep hashtags at the end, always include #chart
+
+### Analytics setup
+- **YouTube Analytics API** must be enabled in the Google Cloud Console for project `81918714942` to use `channel_analytics`, `video_analytics`, and `top_videos` MCP tools
+- Enable at: https://console.developers.google.com/apis/api/youtubeanalytics.googleapis.com/overview?project=81918714942
+- After enabling, re-auth YouTube (`rm ~/.config/mcp-video-publish/youtube-tokens.json` then trigger `auth_youtube`)
+- Use analytics data periodically to update the content strategy tiers above
+
+### Engagement rules
+- **Reply to every viewer comment** — early engagement signals (comments, replies) boost the algorithm's push of a video; an active comment section increases watch time and impressions
+- After every deploy, check recent videos for unreplied viewer comments and respond with short, friendly, on-topic replies

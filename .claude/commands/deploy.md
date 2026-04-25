@@ -1,83 +1,114 @@
 # Deploy Video
 
-Full pipeline for deploying a bar-race video: validate dataset, record with audio, and publish to YouTube.
+Full pipeline: validate → record → publish to YouTube + TikTok.
+
+Orchestrates `/deploy-youtube` and `/deploy-tiktok` skills.
 
 ## Arguments
-- $DATASET_INDEX: Dataset index number (use `npm run record -- --list` to see available)
-- $AUDIO_PATH: Path to audio file (mp3)
+- $DATASET_INDEX: Dataset index numbers (use `npm run record -- --list` to see available)
+- $AUDIO_PATH: (Optional) Path to mp3. If not provided, auto-picks random track from `music/`.
+
+## How to Call
+
+```
+# Single video — publish immediately to both platforms
+/deploy 44
+
+# Multiple videos — auto-stagger 2h apart on YouTube, all at once on TikTok
+/deploy 44 47 50
+
+# With specific audio
+/deploy 44 /path/to/music.mp3
+
+# Schedule starting at specific time
+/deploy 44 47 50 — schedule starting at 7pm
+
+# YouTube only
+/deploy-youtube TOP_10_MILITARY_DRONE_FLEETS.mp4
+
+# TikTok only
+/deploy-tiktok TOP_10_MILITARY_DRONE_FLEETS.mp4
+```
+
+## Best Practices
+
+### Single video
+1. Record → upload public to YouTube with comment → upload to TikTok
+2. Remind user to pin comment in YouTube Studio
+
+### Multiple videos (staggered)
+1. Record all videos
+2. Upload **Video 1** to YouTube as **public** with comment — goes live immediately
+3. Upload **Videos 2+** to YouTube with `schedule_at` parameter (2h intervals):
+   - Video 2: `schedule_at` = now + 2h
+   - Video 3: `schedule_at` = now + 4h
+   - Video N: `schedule_at` = now + (N-1) × 2h
+4. Note scheduled video IDs — comments can only be posted after they go public
+5. Upload ALL videos to TikTok immediately (no scheduling available)
+6. List "Comments pending" in report for scheduled videos
+
+### Important: Do NOT upload public then switch to scheduled
+YouTube does NOT allow scheduling a video that was previously public. Always use `schedule_at` at upload time for videos that need scheduling.
+
+### Timezone
+User is in EEST (UTC+3). Always convert local times to UTC for `schedule_at`.
 
 ## Steps
 
-### 1. Validate Dataset
+### 1. Validate & Verify Data
+- `npx tsc --noEmit` must pass
+- Dataset must meet all CLAUDE.md rules
+- **MANDATORY**: Run `/verify-dataset` on each dataset file before recording. This searches the web for real-world data and fixes inaccuracies. Do NOT skip — viewers call out wrong data in comments, which damages channel credibility.
+- If verification finds errors, fix them and re-compile before proceeding.
 
-Before recording, double-check the dataset for correctness:
-
-- Run `npx tsc --noEmit` to verify the project compiles
-- Read the dataset file and verify:
-  - At least 30 items in ITEMS array
-  - Every item has `id`, `name`, `color`, and `renderIcon`
-  - MILESTONES has entries for all items that should appear in the top 10
-  - No milestone years exceed `endYear`
-  - USSR and Russia are separate entities (if applicable)
-  - Historical states transition to zero when dissolved (if applicable)
-  - `skipEmptyStartFrames` is `false`
-  - `valueUnit` is set
-  - `events` has exactly 3-4 entries with 15+ year gaps between each
-  - `topN` is 10
-  - Title includes "TOP 10"
-  - Time span is between 40-100 years
-- Run the dev server and capture a test frame at progress 0.5 to visually verify the chart looks correct
-- Report any issues found before proceeding
-
-### 2. Record Video
-
+### 2. Record
 ```bash
-npm run record -- $DATASET_INDEX --audio "$AUDIO_PATH"
+npm run record -- $DATASET_INDEX
 ```
 
-Verify the output MP4 exists in `recordings/` and check its dimensions are correct for Shorts (should be vertical from the recorder, but verify width < height).
+### 3. Publish YouTube
+Invoke `/deploy-youtube` for each video:
+- Video 1: no schedule (public immediately)
+- Videos 2+: with `schedule_at`
 
-### 3. Publish to YouTube
+### 4. Publish TikTok
+Invoke `/deploy-tiktok` for each video (all immediately, no scheduling available).
 
-Follow the publishing rules from CLAUDE.md:
-- **Title**: max 60 characters, punchy, CTR-optimized
-- **Hashtags**: exactly 3 hashtags at end of title — always include `#chart`
-- **Description**: 1-2 sentence summary of what the video shows
-- Do NOT use YouTube metadata tags — only hashtags in title
-- Privacy: public
+### 5. Post Comments
+- Public videos: comment posted via `publish_youtube` `comment` parameter
+- Scheduled videos: list IDs in report — user asks to post comments after each goes live
 
-Use the youtube upload module from `mcp-publish/youtube.mjs` to publish:
+### 6. Reply to Existing Comments
+Check recent YouTube videos for unreplied viewer comments. Reply with short, friendly responses.
 
-```javascript
-import { upload } from './mcp-publish/youtube.mjs';
-await upload('recordings/<filename>.mp4', {
-  title: '<generated title> #tag1 #tag2 #chart',
-  description: '<generated description>',
-  tags: [],
-  privacyStatus: 'public',
-});
-```
-
-### 4. Post Comment
-
-After uploading, always post this pinned comment on the video:
+### 7. Report
 
 ```
-Train like a pro, or build your own workouts 🏋️‍♂️
-Start here: https://trainingclub.team/download
+=== DEPLOY REPORT ===
+
+YouTube:
+  ✅ Video 1: <URL> — public — comment posted
+  ⏰ Video 2: <URL> — scheduled 2:00 PM — comment pending
+  ⏰ Video 3: <URL> — scheduled 4:00 PM — comment pending
+
+TikTok:
+  ✅ Video 1: processing
+  ✅ Video 2: processing
+  ✅ Video 3: processing
+
+Reminders:
+  - Pin comments in YouTube Studio
+  - Post comments on scheduled videos after they go live
+  - Reply to viewer comments on recent videos
 ```
 
-Use the `addComment` function from `mcp-publish/youtube.mjs`:
+## Platform Comparison
 
-```javascript
-import { addComment } from './mcp-publish/youtube.mjs';
-await addComment(videoId, 'Train like a pro, or build your own workouts 🏋️‍♂️\nStart here: https://trainingclub.team/download');
-```
-
-### 5. Report
-
-Print the final result:
-- Video URL
-- Title used
-- Description used
-- Any validation warnings found in step 1
+| Feature | YouTube | TikTok |
+|---------|---------|--------|
+| Upload | ✅ | ✅ |
+| Schedule | ✅ `schedule_at` | ❌ |
+| Comments | ✅ (public only) | ❌ |
+| Description | Separate field | Part of caption |
+| Analytics | ✅ | ❌ |
+| Playlists | ✅ | ❌ |

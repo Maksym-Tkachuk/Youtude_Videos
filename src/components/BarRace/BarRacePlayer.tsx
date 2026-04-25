@@ -323,20 +323,9 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
     .filter(g => g.value > minValue)
     .sort((a, b) => b.value - a.value)
     .slice(0, topN);
-  // maxVal = the largest value seen from the start up to the current frame.
-  // This ensures bars grow as values increase over time, while guaranteeing
-  // #1 always has the longest bar (since it has the highest current value
-  // and maxVal >= all current values).
-  const globalMaxUpToNow = useMemo(() => {
-    let gMax = 1;
-    for (let i = 0; i <= frameIdx; i++) {
-      for (const item of config.items) {
-        gMax = Math.max(gMax, frames[i].vals[item.id] ?? 0);
-      }
-    }
-    return gMax;
-  }, [config.items, frames, frameIdx]);
-  const maxVal = Math.max(globalMaxUpToNow, ...allWithValues.map(i => i.value)) * 1.02;
+  // maxVal = the largest value in the current frame so the #1 bar always
+  // fills the full width and bars rescale dynamically as values change.
+  const maxVal = Math.max(1, ...topItems.map(i => i.value)) * 1.02;
   const yearSpan = config.endYear - config.startYear;
   const showMonth = framesPerYear > 1 && yearSpan <= 30;
   const monthIdx = showMonth
@@ -463,6 +452,8 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
     <style>{`
       @keyframes barPulse { from { opacity: 1; } to { opacity: 0.7; } }
       @keyframes rowSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes subscribeFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes subscribePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
     `}</style>
     <div data-testid={`${testIdPrefix}-page`} style={{
       minHeight: "100vh",
@@ -519,6 +510,7 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
           display: "flex",
           flexDirection: "column",
           fontFamily: theme.fontBody,
+          position: "relative",
         }}>
           {/* Header */}
           <div data-testid={`${testIdPrefix}-header`} style={{ padding: "12px 0 4px", textAlign: "center", flexShrink: 0 }}>
@@ -729,6 +721,43 @@ export default function BarRacePlayer({ config, datasets, onDatasetChange, selec
               labelActiveColor: theme.timelineLabelActiveColor,
             }}
           />
+
+          {/* Subscribe CTA — absolute overlay centered, shows at 15s for 3s with fade */}
+          {(() => {
+            const elapsedSec = virtualProgress * (targetDuration / 1000);
+            if (elapsedSec < 14.5 || elapsedSec > 18.5) return null;
+            // Fade in 14.5-15.5s, full 15.5-17s, fade out 17-18.5s
+            let opacity = 1;
+            if (elapsedSec < 15.5) opacity = (elapsedSec - 14.5) / 1;
+            else if (elapsedSec > 17) opacity = 1 - (elapsedSec - 17) / 1.5;
+            const scale = 0.9 + 0.1 * opacity;
+            return (
+              <div style={{
+                position: "absolute", inset: 0,
+                display: "flex", justifyContent: "center", alignItems: "center",
+                zIndex: 100, pointerEvents: "none",
+                opacity,
+              }}>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  background: "linear-gradient(135deg, #ff0000, #cc0000)",
+                  borderRadius: 24, padding: "10px 24px",
+                  boxShadow: `0 4px ${24 * opacity}px rgba(255,0,0,${0.5 * opacity}), 0 0 ${60 * opacity}px rgba(255,0,0,${0.2 * opacity})`,
+                  transform: `scale(${scale})`,
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+                  </svg>
+                  <span style={{
+                    color: "#ffffff", fontSize: 16, fontWeight: 800,
+                    fontFamily: theme.fontBody, letterSpacing: 1.5, textTransform: "uppercase",
+                  }}>
+                    Subscribe
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
 
         </div>
       </div>

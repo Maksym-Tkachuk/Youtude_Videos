@@ -111,7 +111,7 @@ export async function upload(
   );
 
   const initData = await initRes.json();
-  if (initData.error?.code) {
+  if (initData.error?.code && initData.error.code !== "ok") {
     throw new Error(
       `TikTok init failed: ${initData.error.code} — ${initData.error.message}`,
     );

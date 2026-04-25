@@ -57,6 +57,18 @@ const COUNTRY_CATALOG: Array<Pick<BarRaceItem, "id" | "name">> = [
   { id: "morocco", name: "Morocco" },
   { id: "malaysia", name: "Malaysia" },
   { id: "algeria", name: "Algeria" },
+  { id: "azerbaijan", name: "Azerbaijan" },
+  { id: "el_salvador", name: "El Salvador" },
+  { id: "honduras", name: "Honduras" },
+  { id: "jamaica", name: "Jamaica" },
+  { id: "trinidad_and_tobago", name: "Trinidad and Tobago" },
+  { id: "ecuador", name: "Ecuador" },
+  { id: "dominican_republic", name: "Dominican Republic" },
+  { id: "panama", name: "Panama" },
+  { id: "kenya", name: "Kenya" },
+  { id: "tanzania", name: "Tanzania" },
+  { id: "puerto_rico", name: "Puerto Rico" },
+  { id: "haiti", name: "Haiti" },
 ];
 
 const COUNTRY_COLORS = [

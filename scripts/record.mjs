@@ -16,6 +16,7 @@
 
 import puppeteer from "puppeteer";
 import { execSync, spawn } from "child_process";
+import fs from "fs";
 import { mkdir, rm } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -57,13 +58,23 @@ function sanitise(s) {
 
 // ── record one dataset ──────────────────────────────────────────────────────
 
-// ── parse --audio flag ─────────────────────────────────────────────────────
+// ── parse --audio flag (falls back to random track from music/) ────────────
+
+const MUSIC_DIR = path.resolve(import.meta.dirname, "..", "music");
 
 let AUDIO_PATH = null;
 {
   const ai = process.argv.indexOf("--audio");
   if (ai !== -1 && process.argv[ai + 1]) {
     AUDIO_PATH = path.resolve(process.argv[ai + 1]);
+  } else {
+    // Pick a random mp3 from music/ folder
+    try {
+      const files = fs.readdirSync(MUSIC_DIR).filter(f => f.endsWith(".mp3"));
+      if (files.length > 0) {
+        AUDIO_PATH = path.join(MUSIC_DIR, files[Math.floor(Math.random() * files.length)]);
+      }
+    } catch {}
   }
 }
 
